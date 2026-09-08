@@ -36,7 +36,7 @@ function event(overrides: Partial<LogEvent> = {}): LogEvent {
     message: 'Unexpected failure',
     environment: 'web',
     sdk_name: 'pubky-pulse-web',
-    sdk_version: '0.4.0',
+    sdk_version: '0.5.1',
     is_dev: true,
     timestamp: '2026-09-08T00:00:00.000Z',
     ...overrides,
@@ -73,10 +73,14 @@ describe('optional Pulse initialization', () => {
     expect(Pulse.configure).not.toHaveBeenCalled();
     expect(Pulse.error).not.toHaveBeenCalled();
   });
-  it('does not fall back to a hosted endpoint', () => {
-    inject({ pulseEndpoint: undefined });
+  it.each([undefined, '', '   '])('uses the SDK default endpoint when the override is %j', (pulseEndpoint) => {
+    inject({ pulseEndpoint });
     initPulse();
-    expect(Pulse.configure).not.toHaveBeenCalled();
+    expect(Pulse.configure).toHaveBeenCalledOnce();
+    expect(Pulse.configure).toHaveBeenCalledWith(
+      expect.objectContaining({ apiKey: 'pulse_client_local_test_only', endpoint: undefined }),
+    );
+    expect(sdk.configure.mock.calls[0][0]).not.toHaveProperty('bundleId');
   });
   it('configures once with automatic tracking and privacy hooks, independently of Sentry', () => {
     initPulse();
@@ -84,7 +88,6 @@ describe('optional Pulse initialization', () => {
     expect(Pulse.configure).toHaveBeenCalledExactlyOnceWith({
       apiKey: 'pulse_client_local_test_only',
       endpoint: LOCAL_ENDPOINT,
-      bundleId: 'app.pubky.web',
       appVersion: 'test',
       isDev: true,
       consoleLogging: false,

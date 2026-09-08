@@ -3,16 +3,15 @@
 Pulse initializes beside Sentry in `src/instrumentation-client.ts`. It is independent of Sentry;
 neither an account nor configuration is required to build or run this app.
 
-Both `PUBKY_RUNTIME_PULSE_CLIENT_KEY` and `PUBKY_RUNTIME_PULSE_ENDPOINT` must be supplied at
-runtime to opt in. The key is public and write-only (`pulse_client_…`), never an admin key.
-The endpoint is your chosen Pulse ingest server; this app deliberately does not use the SDK's
-hosted fallback. `PUBKY_RUNTIME_PULSE_BUNDLE_ID` defaults to `app.pubky.web` and must match the
-application registered on that server. These settings use the existing synchronous public
-runtime-config injection; no rebuild is needed.
+Set only `PUBKY_RUNTIME_PULSE_CLIENT_KEY` at runtime to opt in. The key is public and write-only
+(`pulse_client_…`), never an admin key. It selects the registered app; no bundle ID is needed.
+The SDK uses its hosted endpoint by default. `PUBKY_RUNTIME_PULSE_ENDPOINT` is an optional
+override for self-hosting or local testing; unset or blank uses the default. These settings
+use the existing synchronous public runtime-config injection; no rebuild is needed.
 
 Omit the client key (or leave it blank) to release without Pulse tracking: the SDK is not
-configured, no collectors start, and capture calls are inert. Omitting the endpoint also
-disables Pulse. Existing Sentry and Plausible behavior is unchanged. Malformed provided runtime
+configured, no collectors start, and capture calls are inert. Existing Sentry and Plausible
+behavior is unchanged. Malformed provided runtime
 settings fail validation, like the other optional configuration tiers.
 
 ## Coverage and privacy

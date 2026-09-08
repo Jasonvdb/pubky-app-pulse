@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   escapeForInlineScript,
-  getPulseBundleId,
   getPulseClientKey,
   getPulseEndpoint,
   getRuntimeConfig,
@@ -92,15 +91,21 @@ describe('runtime-config resolver', () => {
   it('keeps Pulse opt-in and resolves its public settings lazily', () => {
     expect(getPulseClientKey()).toBeUndefined();
     expect(getPulseEndpoint()).toBeUndefined();
-    expect(getPulseBundleId()).toBe('app.pubky.web');
     resetRuntimeConfigForTests();
     process.env[PUBKY_RUNTIME_ENV_NAMES.pulseClientKey] = 'pulse_client_local_test_only';
     process.env[PUBKY_RUNTIME_ENV_NAMES.pulseEndpoint] = 'http://127.0.0.1:4007';
-    process.env[PUBKY_RUNTIME_ENV_NAMES.pulseBundleId] = 'app.pubky.test';
     expect(getPulseClientKey()).toBe('pulse_client_local_test_only');
     expect(getPulseEndpoint()).toBe('http://127.0.0.1:4007');
-    expect(getPulseBundleId()).toBe('app.pubky.test');
     expect(serializeRuntimeConfig()).toContain('"pulseEndpoint":"http://127.0.0.1:4007"');
+  });
+
+  it.each([undefined, '', '   '])('accepts client-key-only Pulse configuration with endpoint %j', (endpoint) => {
+    process.env[PUBKY_RUNTIME_ENV_NAMES.pulseClientKey] = 'pulse_client_local_test_only';
+    if (endpoint !== undefined) process.env[PUBKY_RUNTIME_ENV_NAMES.pulseEndpoint] = endpoint;
+    expect(getPulseClientKey()).toBe('pulse_client_local_test_only');
+    expect(getPulseEndpoint()).toBeUndefined();
+    expect(getRuntimeConfig()).not.toHaveProperty('pulseBundleId');
+    expect(serializeRuntimeConfig()).not.toContain('pulseBundleId');
   });
 
   it.each(['', '   '])('treats blank Pulse configuration as disabled: %j', (blank) => {

@@ -3,12 +3,7 @@ import { Env } from '@/libs/env/env';
 import { AppError } from '@/libs/error/error';
 import { IGNORED_BROWSER_ERRORS } from '@/libs/observability/sentry.constants';
 import { sanitizeForSentry, shouldDropAppErrorFromSentry } from '@/libs/observability/sentry.utils';
-import {
-  getDeployEnv,
-  getPulseBundleId,
-  getPulseClientKey,
-  getPulseEndpoint,
-} from '@/libs/runtime-config/runtime-config';
+import { getDeployEnv, getPulseClientKey, getPulseEndpoint } from '@/libs/runtime-config/runtime-config';
 
 /** Only allow known route shapes: never send user IDs, invite codes, or unknown paths. */
 export function pulseScreenName(pathname: string): string {
@@ -54,13 +49,10 @@ export function initPulse(): void {
   try {
     if (typeof window === 'undefined' || Env.NODE_ENV === 'test' || Env.VITEST || Pulse.sessionId) return;
     const apiKey = getPulseClientKey();
-    const endpoint = getPulseEndpoint();
-    // Require the deployer to choose a destination; never use the SDK's hosted fallback.
-    if (!apiKey || !endpoint) return;
+    if (!apiKey) return;
     Pulse.configure({
       apiKey,
-      endpoint,
-      bundleId: getPulseBundleId(),
+      endpoint: getPulseEndpoint(),
       appVersion: Env.NEXT_PUBLIC_APP_VERSION,
       isDev: Env.NODE_ENV !== 'production' || getDeployEnv() !== 'production',
       consoleLogging: false,
