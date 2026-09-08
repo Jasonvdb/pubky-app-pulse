@@ -1,4 +1,5 @@
 import { Logger } from '../logger/logger';
+import { capturePulseError } from '../observability/pulse';
 import { captureAppError } from '../observability/sentry';
 import { AppError, type AppErrorParams } from './error';
 import type {
@@ -65,6 +66,7 @@ function createAppError<C extends ErrorCategory>(
     Logger.warn('[Err.factory] captureAppError failed', sentryError);
   }
 
+  capturePulseError(error);
   return error;
 }
 

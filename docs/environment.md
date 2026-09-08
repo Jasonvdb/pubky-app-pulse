@@ -77,6 +77,11 @@ The contract has three tiers:
 - **Optional moderation identity**: `moderationId` must be a raw 52-character z-base-32 Pubky when set. In deployed environments, leaving it unset disables moderation-tag matching and the one-time default follow.
 - **Optional/defaulted public values**: operational polling and TTL settings, moderated tags, exchange-rate API, Prelude, Plausible, metadata/branding defaults, and external links. Missing values use the defaults in `src/libs/runtime-config/runtime-config.schema.ts`; malformed provided values still fail loudly.
 
+Pulse browser telemetry is another optional tier: `PUBKY_RUNTIME_PULSE_CLIENT_KEY` and an
+explicit `PUBKY_RUNTIME_PULSE_ENDPOINT` must both be set to enable it.
+`PUBKY_RUNTIME_PULSE_BUNDLE_ID` defaults to `app.pubky.web`. Omitting/blanking the client key
+means zero Pulse tracking. See [Pulse](pulse.md) for coverage, privacy and local verification.
+
 ### Why a separate mechanism
 
 Next.js inlines every literal `process.env.NEXT_PUBLIC_*` reference at **build time** (even in server code). A value baked into the image cannot change per environment. To make these values runtime-configurable we read **non-`NEXT_PUBLIC_` env names** (`PUBKY_RUNTIME_*`) on the server at request time and inject them into the HTML.

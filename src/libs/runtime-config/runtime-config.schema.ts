@@ -156,6 +156,7 @@ export const SENTRY_RUNTIME_DEFAULTS = {
 } as const;
 
 export const APP_RUNTIME_DEFAULTS = {
+  pulseBundleId: 'app.pubky.web',
   notificationPollIntervalMs: 8888,
   notificationPollOnStart: true,
   notificationRespectPageVisibility: true,
@@ -223,6 +224,10 @@ export type NetworkRuntimeConfig = z.infer<typeof networkConfigValueSchema>;
  * Validates `window.__PUBKY_CONFIG__`.
  */
 export const runtimeConfigValueSchema = networkConfigValueSchema.extend({
+  /** Optional browser telemetry. Both a client key and explicit endpoint are needed. */
+  pulseClientKey: optionalTrimmedString.pipe(z.string().startsWith('pulse_client_').optional()),
+  pulseEndpoint: urlValue.optional(),
+  pulseBundleId: nonEmptyStringValue.default(APP_RUNTIME_DEFAULTS.pulseBundleId),
   /** Sentry DSN shared by browser/server/edge. Absent/empty disables Sentry entirely. */
   sentryDsn: urlValue.optional(),
   /** Environment tag attached to every Sentry event. Absent falls back to NODE_ENV (see sentry.ts). */
@@ -297,6 +302,9 @@ export const runtimeEnvInputSchema = z
     pkarrRelays: pkarrRelaysFromString,
     testnet: testnetFromString,
     deployEnv: deployEnvValue,
+    pulseClientKey: optionalTrimmedString,
+    pulseEndpoint: optionalUrlFromString,
+    pulseBundleId: optionalTrimmedString,
     sentryDsn: optionalTrimmedString,
     sentryEnvironment: optionalTrimmedString,
     sentryTracesSampleRate: sampleRateFromString,
@@ -375,6 +383,9 @@ export const runtimeEnvInputSchemaWithDefaults = z
     pkarrRelays: z.string().default(JSON.stringify(NETWORK_RUNTIME_DEFAULTS.pkarrRelays)).pipe(pkarrRelaysFromString),
     testnet: z.string().default(String(NETWORK_RUNTIME_DEFAULTS.testnet)).pipe(testnetFromString),
     deployEnv: deployEnvValue.default(NETWORK_RUNTIME_DEFAULTS.deployEnv),
+    pulseClientKey: optionalTrimmedString,
+    pulseEndpoint: optionalUrlFromString,
+    pulseBundleId: optionalTrimmedString,
     sentryDsn: optionalTrimmedString,
     sentryEnvironment: optionalTrimmedString,
     sentryTracesSampleRate: sampleRateFromString,
@@ -445,6 +456,9 @@ const NETWORK_RUNTIME_ENV_NAMES: Record<keyof NetworkRuntimeConfig, string> = {
 
 export const PUBKY_RUNTIME_ENV_NAMES: Record<keyof RuntimeConfig, string> = {
   ...NETWORK_RUNTIME_ENV_NAMES,
+  pulseClientKey: 'PUBKY_RUNTIME_PULSE_CLIENT_KEY',
+  pulseEndpoint: 'PUBKY_RUNTIME_PULSE_ENDPOINT',
+  pulseBundleId: 'PUBKY_RUNTIME_PULSE_BUNDLE_ID',
   sentryDsn: 'PUBKY_RUNTIME_SENTRY_DSN',
   sentryEnvironment: 'PUBKY_RUNTIME_SENTRY_ENVIRONMENT',
   sentryTracesSampleRate: 'PUBKY_RUNTIME_SENTRY_TRACES_SAMPLE_RATE',

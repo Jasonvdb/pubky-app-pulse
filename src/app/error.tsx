@@ -7,6 +7,7 @@ import { Container } from '@/atoms/Container/Container';
 import { Typography } from '@/atoms/Typography/Typography';
 import { AppError } from '@/libs/error/error';
 import { Logger } from '@/libs/logger/logger';
+import { capturePulseError } from '@/libs/observability/pulse';
 
 export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
@@ -16,6 +17,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
     // only capture the non-AppError path here to avoid double-emitting the same fingerprint.
     if (!(error instanceof AppError)) {
       Sentry.captureException(error);
+      capturePulseError(error);
     }
   }, [error]);
 
