@@ -2,8 +2,8 @@
 import './globals.css';
 import { useEffect } from 'react';
 import * as Sentry from '@sentry/nextjs';
+import { Pulse } from '@synonymdev/pubky-pulse-web';
 import { AppError } from '@/libs/error/error';
-import { capturePulseError } from '@/libs/observability/pulse';
 
 export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
@@ -12,7 +12,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
     // capturing again here would create duplicate events with the same fingerprint.
     if (!(error instanceof AppError)) {
       Sentry.captureException(error);
-      capturePulseError(error);
+      Pulse.captureException(error);
     }
   }, [error]);
 

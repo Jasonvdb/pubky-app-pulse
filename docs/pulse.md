@@ -11,23 +11,24 @@ use the existing synchronous public runtime-config injection; no rebuild is need
 
 Omit the client key (or leave it blank) to release without Pulse tracking: the SDK is not
 configured, no collectors start, and capture calls are inert. Existing Sentry and Plausible
-behavior is unchanged. Malformed provided runtime
-settings fail validation, like the other optional configuration tiers.
+behavior is unchanged. Malformed provided runtime settings fail validation, like the other
+optional configuration tiers.
 
 ## Coverage and privacy
 
 - SDK-managed anonymous sessions, page views/duration, uncaught browser errors, unhandled
   promise rejections, and global `fetch` timing/status. No XHR, request/response bodies, replay,
   user identification, session-header propagation, or custom product journeys are enabled.
-- `Err.*` factories and non-AppError render-boundary failures share a tiny browser-only bridge.
+- `Err.*` factories and non-AppError render-boundary failures call `Pulse.captureException` directly.
   Factory errors carry category/code/service/operation/trace metadata, not raw error context.
-  Expected failures reuse Sentry's ignore/drop policy. Automatically recaptured AppErrors are
-  dropped; React render retries may still create separate errors (see [Sentry](sentry.md)).
+  Expected failures reuse Sentry's ignore/drop policy. The SDK deduplicates the same exception
+  object, even when dropped; React retries may create separate errors (see [Sentry](sentry.md)).
 - `screenNameForPath` maps dynamic identifiers to route templates and unknown routes to
-  `/unknown`; query strings and fragments are excluded. Add new safe route shapes in
-  `pulseScreenName` when introducing routes.
+  `/unknown` using the SDK's `createScreenNameMapper`; query strings and fragments are excluded.
+  `pulseScreenName` reuses app route constants: review additions to them as telemetry allowlist
+  changes. Dynamic templates remain explicit; `/feed` without an ID stays `/unknown`.
 - `beforeSend` applies the existing Sentry message/attribute sanitizer, including error stacks,
-  without changing the SDK's anonymous identity. Network URLs are reduced to origin; paths,
+  without changing the SDK's anonymous identity. SDK network tracking uses origin-only URLs; paths,
   credentials, queries and fragments are not retained. Filtering runs before buffering/storage.
 - App version is the existing build version. Non-production builds and staging deploys are
   development traffic. This is browser instrumentation only, not the Node SDK or server capture.
