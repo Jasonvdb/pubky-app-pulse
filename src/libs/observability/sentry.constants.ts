@@ -1,17 +1,3 @@
-import { INLINE_IMAGE_UPLOAD_REJECTION_NAME } from '@/hooks/useInlineImageUpload/useInlineImageUpload.types';
-
-/** Expected browser failures ignored by both telemetry backends. */
-export const IGNORED_BROWSER_ERRORS = [
-  'ResizeObserver loop limit exceeded',
-  'ResizeObserver loop completed with undelivered notifications',
-  'Failed to fetch',
-  /Loading chunk \d+ failed/,
-  'AbortError',
-  'Non-Error promise rejection captured',
-  // Inline-image rejections are surfaced by toast; genuine failures already use Err.*.
-  INLINE_IMAGE_UPLOAD_REJECTION_NAME,
-];
-
 const Z32_ALPHABET = 'ybndrfg8ejkmcpqxot1uwisza345h769';
 
 export const PUBKY_REDACTED = '[redacted: pubky identifier]';

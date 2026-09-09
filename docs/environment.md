@@ -77,11 +77,15 @@ The contract has three tiers:
 - **Optional moderation identity**: `moderationId` must be a raw 52-character z-base-32 Pubky when set. In deployed environments, leaving it unset disables moderation-tag matching and the one-time default follow.
 - **Optional/defaulted public values**: operational polling and TTL settings, moderated tags, exchange-rate API, Prelude, Plausible, metadata/branding defaults, and external links. Missing values use the defaults in `src/libs/runtime-config/runtime-config.schema.ts`; malformed provided values still fail loudly.
 
-Pulse browser telemetry is another optional tier: only `PUBKY_RUNTIME_PULSE_CLIENT_KEY` is
-needed to enable it. `PUBKY_RUNTIME_PULSE_ENDPOINT` optionally overrides the SDK's hosted
-endpoint for self-hosting or local testing. No bundle ID is needed; the key selects the app.
-Omitting/blanking the client key means zero Pulse tracking. See [Pulse](pulse.md) for coverage,
-privacy and local verification.
+Pulse browser telemetry is opt-in: set the public, write-only `PUBKY_RUNTIME_PULSE_CLIENT_KEY`
+(`pulse_client_…`, never an admin key); omit or blank it for zero Pulse tracking.
+`PUBKY_RUNTIME_PULSE_ENDPOINT` optionally overrides the SDK's hosted endpoint; no bundle ID is needed.
+Pulse initializes beside Sentry and collects anonymous sessions, route views, errors and fetch timing,
+not bodies, replay or identified users. Routes use safe templates, network URLs retain only origins,
+and error hooks reuse existing redaction/drop policies with explicitly allowlisted operational metadata,
+never raw error context. Review route-constant additions as telemetry allowlist changes.
+For local verification, use a dummy client key and a local Pulse-compatible collector, then repeat
+with the key removed. Existing Sentry and Plausible behavior is unchanged.
 
 ### Why a separate mechanism
 

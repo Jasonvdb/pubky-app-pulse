@@ -11,9 +11,9 @@ import {
   ROOT_ROUTES,
   SETTINGS_ROUTES,
 } from '@/app/routes';
+import { INLINE_IMAGE_UPLOAD_REJECTION_NAME } from '@/hooks/useInlineImageUpload/useInlineImageUpload.types';
 import { Env } from '@/libs/env/env';
 import { AppError } from '@/libs/error/error';
-import { IGNORED_BROWSER_ERRORS } from '@/libs/observability/sentry.constants';
 import { sanitizeForSentry, shouldDropAppErrorFromSentry } from '@/libs/observability/sentry.utils';
 import { getDeployEnv, getPulseClientKey, getPulseEndpoint } from '@/libs/runtime-config/runtime-config';
 
@@ -70,7 +70,15 @@ export function initPulse(): void {
       appVersion: Env.NEXT_PUBLIC_APP_VERSION,
       isDev: Env.NODE_ENV !== 'production' || getDeployEnv() !== 'production',
       consoleLogging: false,
-      ignoreErrors: IGNORED_BROWSER_ERRORS,
+      ignoreErrors: [
+        'ResizeObserver loop limit exceeded',
+        'ResizeObserver loop completed with undelivered notifications',
+        'Failed to fetch',
+        /Loading chunk \d+ failed/,
+        'AbortError',
+        'Non-Error promise rejection captured',
+        INLINE_IMAGE_UPLOAD_REJECTION_NAME,
+      ],
       networkTracking: { urlMode: 'origin' },
       screenNameForPath: pulseScreenName,
       beforeSend: beforeSendPulse,
